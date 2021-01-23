@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -6,7 +7,6 @@ use vec3::*;
 mod ray;
 use ray::*;
 
-#[allow(dead_code)]
 fn some_vec3_test() {
     let test_vals: [f64; 3] = [45.0, 55.0, 56.0];
     let test_vec = Vec3::from(test_vals[0], test_vals[1], test_vals[2]);
@@ -52,7 +52,6 @@ fn some_vec3_test() {
     assert_eq!(test_vec[0] * new_vec[0], mul_vec[0])
 }
 
-#[allow(dead_code)]
 fn first_image_print() {
     let image_width = 256;
     let image_height = 256;
@@ -89,11 +88,11 @@ fn first_image_print() {
 }
 
 fn test_ray() {
-    let test_ray = Ray::from(&point3::from(3.0, 4.0, 5.0), &Vec3::from(6.0, 7.0, 8.0));
+    let test_ray = Ray::from(&Point3::from(3.0, 4.0, 5.0), &Vec3::from(6.0, 7.0, 8.0));
     println!("{:?}", test_ray);
 }
 
-fn write_color(file: &mut File, display: &std::path::Display, pixel_color: color) {
+fn write_color(file: &mut File, display: &std::path::Display, pixel_color: Color) {
     let ir: i64 = (255.999 * pixel_color.x()) as i64;
     let ig: i64 = (255.999 * pixel_color.y()) as i64;
     let ib: i64 = (255.999 * pixel_color.z()) as i64;
@@ -105,24 +104,24 @@ fn write_color(file: &mut File, display: &std::path::Display, pixel_color: color
     }
 }
 
-fn ray_color(r: &Ray) -> color {
+fn ray_color(r: &Ray) -> Color {
     let unit_direction = unit_vector(r.direction());
     let t = 0.5 * (unit_direction.y() + 1.0);
-    (1.0 - t) * color::from(1.0, 1.0, 1.0) + t * color::from(0.5, 0.7, 1.0)
+    (1.0 - t) * Color::from(1.0, 1.0, 1.0) + t * Color::from(0.5, 0.7, 1.0)
 }
 
 fn main() {
     // Image
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
-    let image_height = image_width / aspect_ratio as i32;
+    let image_height = (image_width as f64 / aspect_ratio) as i32;
 
     // Camera
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
     let focal_length = 1.0;
 
-    let origin = point3::from(0.0, 0.0, 0.0);
+    let origin = Point3::from(0.0, 0.0, 0.0);
     let horizontal = Vec3::from(viewport_width, 0.0, 0.0);
     let vertical = Vec3::from(0.0, viewport_height, 0.0);
     let lower_left_corner =
@@ -153,5 +152,4 @@ fn main() {
             write_color(&mut file, &display, pixel_color);
         }
     }
-    test_ray();
 }
