@@ -8,7 +8,7 @@ pub struct Vec3 {
 #[allow(dead_code)]
 impl Vec3 {
     pub fn new() -> Self {
-        Self { e: [0., 0., 0.] }
+        Self { e: [0.0, 0.0, 0.0] }
     }
     pub fn from(e0: f64, e1: f64, e2: f64) -> Self {
         Self { e: [e0, e1, e2] }
