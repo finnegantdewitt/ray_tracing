@@ -105,9 +105,21 @@ fn write_color(file: &mut File, display: &std::path::Display, pixel_color: Color
 }
 
 fn ray_color(r: &Ray) -> Color {
+    if hit_sphere(&Point3::from(0.0, 0.0, -1.0), 0.5, r) {
+        return Color::from(1.0, 0.0, 0.0);
+    }
     let unit_direction = unit_vector(r.direction());
     let t = 0.5 * (unit_direction.y() + 1.0);
     (1.0 - t) * Color::from(1.0, 1.0, 1.0) + t * Color::from(0.5, 0.7, 1.0)
+}
+
+fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> bool {
+    let oc = r.origin() - *center;
+    let a = dot(r.direction(), r.direction());
+    let b = 2.0 * dot(oc, r.direction());
+    let c = dot(oc, oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant > 0.0
 }
 
 fn main() {
