@@ -6,6 +6,10 @@ mod vec3;
 use vec3::*;
 mod ray;
 use ray::*;
+mod hittable;
+use hittable::*;
+mod sphere;
+use sphere::*;
 
 fn some_vec3_test() {
     let test_vals: [f64; 3] = [45.0, 55.0, 56.0];
@@ -158,7 +162,7 @@ fn main() {
         Ok(_) => {}
     }
     for j in (0..image_height).rev() {
-        //println!("Scanlines remaining: {}", j);
+        println!("Scanlines remaining: {}", j);
         for i in 0..image_width {
             let u = i as f64 / (image_width - 1) as f64;
             let v = j as f64 / (image_height - 1) as f64;
