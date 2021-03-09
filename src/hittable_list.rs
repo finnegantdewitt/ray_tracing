@@ -1,9 +1,10 @@
 use crate::hittable::*;
 use crate::ray::*;
 use crate::vec3::*;
+use std::rc::Rc;
 
 pub struct HittableList {
-    pub objects: Vec<Hittable>,
+    pub objects: Vec<Rc<dyn Hittable>>,
 }
 
 impl HittableList {

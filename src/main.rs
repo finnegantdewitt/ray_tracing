@@ -10,6 +10,8 @@ mod hittable;
 use hittable::*;
 mod sphere;
 use sphere::*;
+mod hittable_list;
+use hittable_list::*;
 
 fn some_vec3_test() {
     let test_vals: [f64; 3] = [45.0, 55.0, 56.0];
@@ -121,11 +123,10 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     }
 }
 
-fn ray_color(r: &Ray) -> Color {
-    let t = hit_sphere(&Point3::from(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        let n = unit_vector(r.at(t) - Vec3::from(0.0, 0.0, -1.0));
-        return 0.5 * Color::from(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+fn ray_color(r: &Ray, world: &Hittable) -> Color {
+    let rec = HitRecord::void();
+    if (world.hit(r, 0.0, f64::INFINITY, rec)) {
+        return 0.5 * (rec.normal + Color(1, 1, 1));
     }
     let unit_direction = unit_vector(r.direction());
     let t = 0.5 * (unit_direction.y() + 1.0);
@@ -137,6 +138,10 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
+
+    // World
+    let world = HittableList::new();
+    world.
 
     // Camera
     let viewport_height = 2.0;
