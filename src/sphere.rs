@@ -8,13 +8,13 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             center: Point3::new(),
             radius: 0.0,
         }
     }
-    fn from(cen: Point3, r: f64) -> Self {
+    pub fn from(cen: Point3, r: f64) -> Self {
         Self {
             center: cen,
             radius: r,

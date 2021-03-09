@@ -2,6 +2,7 @@
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use std::rc::Rc;
 mod vec3;
 use vec3::*;
 mod ray;
@@ -123,10 +124,10 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     }
 }
 
-fn ray_color(r: &Ray, world: &Hittable) -> Color {
-    let rec = HitRecord::void();
-    if (world.hit(r, 0.0, f64::INFINITY, rec)) {
-        return 0.5 * (rec.normal + Color(1, 1, 1));
+fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+    let mut rec = &mut HitRecord::void();
+    if world.hit(r, 0.0, f64::INFINITY, rec) {
+        return 0.5 * (rec.normal + Color::from(1.0, 1.0, 1.0));
     }
     let unit_direction = unit_vector(r.direction());
     let t = 0.5 * (unit_direction.y() + 1.0);
@@ -140,8 +141,12 @@ fn main() {
     let image_height = (image_width as f64 / aspect_ratio) as i32;
 
     // World
-    let world = HittableList::new();
-    world.
+    let mut world = HittableList::new();
+    world.add(Rc::new(Sphere::from(Point3::from(0.0, 0.0, -1.0), 0.5)));
+    world.add(Rc::new(Sphere::from(
+        Point3::from(0.0, -100.5, -1.0),
+        100.0,
+    )));
 
     // Camera
     let viewport_height = 2.0;
@@ -175,7 +180,7 @@ fn main() {
                 &origin,
                 &(lower_left_corner + u * horizontal + v * vertical - origin),
             );
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             write_color(&mut file, &display, pixel_color);
         }
     }
