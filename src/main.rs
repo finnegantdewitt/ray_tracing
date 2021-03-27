@@ -13,6 +13,12 @@ mod sphere;
 use sphere::*;
 mod hittable_list;
 use hittable_list::*;
+mod utils;
+use utils::*;
+mod camera;
+use camera::*;
+mod color;
+use color::*;
 
 fn some_vec3_test() {
     let test_vals: [f64; 3] = [45.0, 55.0, 56.0];
@@ -99,17 +105,17 @@ fn test_ray() {
     println!("{:?}", test_ray);
 }
 
-fn write_color(file: &mut File, display: &std::path::Display, pixel_color: Color) {
-    let ir: i64 = (255.999 * pixel_color.x()) as i64;
-    let ig: i64 = (255.999 * pixel_color.y()) as i64;
-    let ib: i64 = (255.999 * pixel_color.z()) as i64;
-    let line = format!("{} {} {}\n", ir, ig, ib);
+// fn write_color(file: &mut File, display: &std::path::Display, pixel_color: Color) {
+//     let ir: i64 = (255.999 * pixel_color.x()) as i64;
+//     let ig: i64 = (255.999 * pixel_color.y()) as i64;
+//     let ib: i64 = (255.999 * pixel_color.z()) as i64;
+//     let line = format!("{} {} {}\n", ir, ig, ib);
 
-    match file.write(line.as_bytes()) {
-        Err(why) => panic!("couldn't write to {}: {}", display, why),
-        Ok(_) => {}
-    }
-}
+//     match file.write(line.as_bytes()) {
+//         Err(why) => panic!("couldn't write to {}: {}", display, why),
+//         Ok(_) => {}
+//     }
+// }
 
 fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let oc = r.origin() - *center;
@@ -125,7 +131,7 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
 }
 
 fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
-    let mut rec = &mut HitRecord::void();
+    let rec = &mut HitRecord::void();
     if world.hit(r, 0.0, f64::INFINITY, rec) {
         return 0.5 * (rec.normal + Color::from(1.0, 1.0, 1.0));
     }
@@ -139,6 +145,7 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
+    let samples_per_pixel = 100;
 
     // World
     let mut world = HittableList::new();
@@ -149,15 +156,16 @@ fn main() {
     )));
 
     // Camera
-    let viewport_height = 2.0;
-    let viewport_width = aspect_ratio * viewport_height;
-    let focal_length = 1.0;
+    let cam: Camera = Camera::new();
+    // let viewport_height = 2.0;
+    // let viewport_width = aspect_ratio * viewport_height;
+    // let focal_length = 1.0;
 
-    let origin = Point3::from(0.0, 0.0, 0.0);
-    let horizontal = Vec3::from(viewport_width, 0.0, 0.0);
-    let vertical = Vec3::from(0.0, viewport_height, 0.0);
-    let lower_left_corner =
-        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::from(0.0, 0.0, focal_length);
+    // let origin = Point3::from(0.0, 0.0, 0.0);
+    // let horizontal = Vec3::from(viewport_width, 0.0, 0.0);
+    // let vertical = Vec3::from(0.0, viewport_height, 0.0);
+    // let lower_left_corner =
+    //     origin - horizontal / 2.0 - vertical / 2.0 - Vec3::from(0.0, 0.0, focal_length);
 
     let path = Path::new("image.ppm");
     let display = path.display();
@@ -174,14 +182,15 @@ fn main() {
     for j in (0..image_height).rev() {
         println!("Scanlines remaining: {}", j);
         for i in 0..image_width {
-            let u = i as f64 / (image_width - 1) as f64;
-            let v = j as f64 / (image_height - 1) as f64;
-            let r = Ray::from(
-                &origin,
-                &(lower_left_corner + u * horizontal + v * vertical - origin),
-            );
-            let pixel_color = ray_color(&r, &world);
-            write_color(&mut file, &display, pixel_color);
+            let mut pixel_color: Color = Color::from(0., 0., 0.);
+
+            for s in 0..samples_per_pixel {
+                let u = (i as f64 + random_double(0., 1.)) / (image_width - 1) as f64;
+                let v = (j as f64 + random_double(0., 1.)) / (image_height - 1) as f64;
+                let r: Ray = cam.get_ray(u, v);
+                pixel_color += ray_color(&r, &world);
+            }
+            write_color(&mut file, pixel_color, samples_per_pixel);
         }
     }
 }
