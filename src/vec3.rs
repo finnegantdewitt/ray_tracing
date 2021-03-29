@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use crate::utils::*;
 use std::ops;
 
 #[derive(Debug, Copy, Clone)]
@@ -12,6 +13,44 @@ impl Vec3 {
     }
     pub fn from(e0: f64, e1: f64, e2: f64) -> Self {
         Self { e: [e0, e1, e2] }
+    }
+    pub fn random() -> Self {
+        Self {
+            e: [
+                random_double(0., 1.),
+                random_double(0., 1.),
+                random_double(0., 1.),
+            ],
+        }
+    }
+    pub fn random_from(min: f64, max: f64) -> Self {
+        Self {
+            e: [
+                random_double(min, max),
+                random_double(min, max),
+                random_double(min, max),
+            ],
+        }
+    }
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Vec3::random_from(-1., 1.);
+            if p.length_squared() >= 1. {
+                continue;
+            }
+            return p;
+        }
+    }
+    pub fn random_unit_vector() -> Self {
+        unit_vector(Vec3::random_in_unit_sphere())
+    }
+    pub fn random_in_hemisphere(normal: &Vec3) -> Self {
+        let in_unit_sphere = Vec3::random_in_unit_sphere();
+        if dot(in_unit_sphere, *normal) > 0.0 {
+            return in_unit_sphere;
+        } else {
+            return -in_unit_sphere;
+        }
     }
 
     pub fn x(&self) -> f64 {
