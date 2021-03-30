@@ -19,6 +19,8 @@ mod camera;
 use camera::*;
 mod color;
 use color::*;
+mod material;
+use material::*;
 
 fn some_vec3_test() {
     let test_vals: [f64; 3] = [45.0, 55.0, 56.0];
